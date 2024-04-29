@@ -34,23 +34,27 @@ async function addContact(name, email, phone) {
   const contacts = await listContacts();
   const newContact = {
     id: crypto.randomUUID(),
-    ...name,
-    ...email,
-    ...phone,
+    name,
+    email,
+    phone,
   };
   contacts.push(newContact);
   await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
   return newContact;
-  // ...твій код. Повертає об'єкт доданого контакту (з id).
 }
 
 async function updateContact(contactId, name, email, phone) {
   const contacts = await listContacts();
-  const index = contacts.findIndex((contact) => contact.id !== contactId);
+  const index = contacts.findIndex((contact) => contact.id === contactId);
   if (index === -1) {
     return null;
   }
-  const contactToUpdate = { contactId, ...name, ...email, ...phone };
+  const contactToUpdate = {
+    id: contactId,
+    name: name !== undefined ? name : contacts[index].name,
+    email: email !== undefined ? email : contacts[index].email,
+    phone: phone !== undefined ? phone : contacts[index].phone,
+  };
   contacts[index] = contactToUpdate;
   await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
   return contactToUpdate;

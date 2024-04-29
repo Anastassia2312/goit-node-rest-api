@@ -3,7 +3,6 @@ import {
   createContactSchema,
   updateContactSchema,
 } from "../schemas/contactsSchemas.js";
-import { randomUUID } from "crypto";
 
 export const getAllContacts = async (req, res) => {
   try {
@@ -41,22 +40,15 @@ export const deleteContact = async (req, res) => {
   }
 };
 
-export const createContact = async (req, res) => {
+export const createContact = async (req, res, next) => {
   try {
-    const contact = {
-      name: req.body.name,
-      email: req.body.email,
-      phone: req.body.phone,
-    };
-    const { error } = createContactSchema.validate(contact, {
-      convert: false,
-    });
-    if (typeof error !== undefined) {
+    const { error } = createContactSchema.validate(req.body);
+    if (error) {
       return res.status(400).json({ message: error.message });
     }
     const { name, email, phone } = req.body;
-    const createContact = await contactsService.addContact(name, email, phone);
-    res.status(201).json({ id: randomUUID(), ...createContact });
+    const newContact = await contactsService.addContact(name, email, phone);
+    res.status(201).json(newContact);
   } catch (error) {
     next(error);
   }
@@ -64,14 +56,13 @@ export const createContact = async (req, res) => {
 
 export const updateContact = async (req, res) => {
   try {
-    const contact = JSON.stringify(req.body);
-    if (contact === null) {
+    if (!req.body || Object.keys(req.body).length === 0) {
       return res
         .status(400)
         .json({ message: "Body must have at least one field" });
     }
-    const { error } = updateContactSchema.validate(contact);
-    if (error !== undefined) {
+    const { error } = updateContactSchema.validate(req.body);
+    if (error) {
       return res.status(400).json({ message: error.message });
     }
     const { id } = req.params;
