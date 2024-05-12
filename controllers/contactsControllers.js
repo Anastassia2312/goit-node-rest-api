@@ -4,10 +4,12 @@ import {
   updateStatusSchema,
 } from "../schemas/contactsSchemas.js";
 import Contact from "../model/contactsModel.js";
+import HttpError from "../helpers/HttpError.js";
 
 export const getAllContacts = async (req, res, next) => {
   try {
-    const contacts = await Contact.find();
+    console.log(req.user);
+    const contacts = await Contact.find({ owner: req.user._id });
     res.status(200).json(contacts);
   } catch (error) {
     next(error);
@@ -19,7 +21,7 @@ export const getOneContact = async (req, res, next) => {
     const { id } = req.params;
     const contactById = await Contact.findById(id);
     if (!contactById) {
-      return res.status(404).json({ message: "Not found" });
+      throw HttpError(404, { message: "Not found" });
     }
     res.status(200).json(contactById);
   } catch (error) {
@@ -32,7 +34,7 @@ export const deleteContact = async (req, res, next) => {
     const { id } = req.params;
     const removeContact = await Contact.findByIdAndDelete(id);
     if (!removeContact) {
-      return res.status(404).json({ message: "Not found" });
+      throw HttpError(404, { message: "Not found" });
     }
     res.status(200).json(removeContact);
   } catch (error) {
@@ -42,17 +44,14 @@ export const deleteContact = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const { error } = createContactSchema.validate(req.body);
-    if (error) {
-      return res.status(400).json({ message: error.message });
-    }
+    const { _id: owner } = req.user;
     const book = {
       name: req.body.name,
       email: req.body.email,
       phone: req.body.phone,
       favorite: req.body.favorite,
     };
-    const newContact = await Contact.create(book);
+    const newContact = await Contact.create(book, owner);
     res.status(201).json(newContact);
   } catch (error) {
     next(error);
@@ -62,13 +61,7 @@ export const createContact = async (req, res, next) => {
 export const updateContact = async (req, res, next) => {
   try {
     if (!req.body || Object.keys(req.body).length === 0) {
-      return res
-        .status(400)
-        .json({ message: "Body must have at least one field" });
-    }
-    const { error } = updateContactSchema.validate(req.body);
-    if (error) {
-      return res.status(400).json({ message: error.message });
+      throw HttpError(400, "Body must have at least one field");
     }
     const { id } = req.params;
     const { name, email, phone, favorite } = req.body;
@@ -82,7 +75,7 @@ export const updateContact = async (req, res, next) => {
       new: true,
     });
     if (!updateContact) {
-      return res.status(404).json({ message: "Not found" });
+      throw HttpError(404, "Not found");
     }
     res.status(200).json(updateContact);
   } catch (error) {
@@ -93,10 +86,7 @@ export const updateContact = async (req, res, next) => {
 export const updateStatusContact = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { error } = updateStatusSchema.validate(req.body);
-    if (error) {
-      return res.status(400).json({ message: error.message });
-    }
+
     const book = {
       favorite: req.body.favorite,
     };
@@ -105,7 +95,7 @@ export const updateStatusContact = async (req, res, next) => {
     });
 
     if (!contact) {
-      return res.status(404).json({ message: "Not found" });
+      throw HttpError(404, "Not found");
     }
     res.status(200).json(contact);
   } catch (error) {
