@@ -3,6 +3,7 @@ import User from "../model/usersModel.js";
 export const getCurrentUser = async (req, res, next) => {
   try {
     const { token } = req.user;
+    console.log(req.user);
     const result = await User.findOne({ token });
     const { email, subscription } = result;
     console.log(result);
