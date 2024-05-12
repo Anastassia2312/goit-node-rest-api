@@ -8,8 +8,11 @@ import HttpError from "../helpers/HttpError.js";
 
 export const getAllContacts = async (req, res, next) => {
   try {
-    console.log(req.user);
-    const contacts = await Contact.find({ owner: req.user._id });
+    const { page = 1, limit = 10 } = req.query;
+    const skip = (page - 1) * limit;
+    const contacts = await Contact.find({ owner: req.user._id })
+      .skip(skip)
+      .limit(limit);
     res.status(200).json(contacts);
   } catch (error) {
     next(error);
@@ -45,13 +48,15 @@ export const deleteContact = async (req, res, next) => {
 export const createContact = async (req, res, next) => {
   try {
     const { _id: owner } = req.user;
-    const book = {
-      name: req.body.name,
-      email: req.body.email,
-      phone: req.body.phone,
-      favorite: req.body.favorite,
-    };
-    const newContact = await Contact.create(book, owner);
+    const { name, email, phone, favorite } = req.body;
+    const newContact = await Contact.create({
+      name,
+      email,
+      phone,
+      favorite,
+      owner,
+    });
+    console.log(newContact);
     res.status(201).json(newContact);
   } catch (error) {
     next(error);
