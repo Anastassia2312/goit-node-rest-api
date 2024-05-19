@@ -1,6 +1,7 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
+import path from "node:path";
 
 import contactsRouter from "./routes/contactsRouter.js";
 import usersRouter from "./routes/usersRouter.js";
@@ -15,6 +16,7 @@ app.use(express.json());
 
 app.use("/api/contacts", contactsRouter);
 app.use("/users", usersRouter);
+app.use("/avatars", express.static(path.resolve("public/avatars")));
 
 app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });

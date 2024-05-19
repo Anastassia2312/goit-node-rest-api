@@ -3,6 +3,7 @@ import User from "../model/usersModel.js";
 import bcrypt from "bcrypt";
 import "dotenv/config";
 import jwt from "jsonwebtoken";
+import gravatar from "gravatar";
 
 const SECRET_KEY = process.env.SECRET_KEY;
 
@@ -15,10 +16,12 @@ export const register = async (req, res, next) => {
       throw HttpError(409, "Email in use");
     }
     const hashPassword = await bcrypt.hash(password, 10);
+    const avatarURL = gravatar.url(email);
     const newUser = await User.create({
       email,
       password: hashPassword,
       subscription,
+      avatarURL,
     });
     res.status(201).json({
       user: {
