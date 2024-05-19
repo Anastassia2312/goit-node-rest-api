@@ -3,7 +3,8 @@ import Jimp from "jimp";
 export const jimpAvatar = async (filePath) => {
   try {
     const image = await Jimp.read(filePath);
-    return image.resize(250, 250);
+    image.resize(250, 250);
+    image.writeAsync(filePath);
   } catch (error) {
     console.log(error);
     throw error;

@@ -23,13 +23,12 @@ export const updateAvatar = async (req, res, next) => {
   try {
     const { _id: id } = req.user;
     const { path: tmpUpload, originalname } = req.file;
-    const jimp = await jimpAvatar(tmpUpload);
-
+    await jimpAvatar(tmpUpload);
     const fileName = `${id}-${originalname}`;
-    await fs.rename(jimp, path.resolve("public/avatars", fileName));
+    const resultUpload = path.resolve("public/avatars", fileName);
+    await fs.rename(tmpUpload, resultUpload);
     const avatarURL = path.resolve("avatars", fileName);
     const user = await User.findByIdAndUpdate(id, { avatarURL }, { new: true });
-    console.log(user);
     if (!user) {
       throw HttpError(401, "Not authorized");
     }
