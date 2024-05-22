@@ -11,7 +11,6 @@ import {
 } from "../controllers/usersControllers.js";
 import auth from "../middlewares/auth.js";
 import upload from "../middlewares/upload.js";
-import path from "node:path";
 usersRouter.post("/register", validateBody(registerSchema), register);
 usersRouter.post("/login", validateBody(loginSchema), login);
 usersRouter.post("/logout", auth, logout);

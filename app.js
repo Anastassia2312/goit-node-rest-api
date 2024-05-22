@@ -2,10 +2,8 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import path from "node:path";
-
 import contactsRouter from "./routes/contactsRouter.js";
 import usersRouter from "./routes/usersRouter.js";
-import "./db/contactsDB.js";
 import "dotenv/config";
 
 const app = express();
@@ -27,6 +25,8 @@ app.use((err, req, res, next) => {
   res.status(status).json({ message });
 });
 
-app.listen(3000, () => {
+/*app.listen(3000, () => {
   console.log("Server is running. Use our API on port: 3000");
-});
+});*/
+
+export default app;
