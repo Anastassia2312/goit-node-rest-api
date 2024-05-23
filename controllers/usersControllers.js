@@ -27,7 +27,8 @@ export const updateAvatar = async (req, res, next) => {
     const fileName = `${id}-${originalname}`;
     const resultUpload = path.resolve("public/avatars", fileName);
     await fs.rename(tmpUpload, resultUpload);
-    const avatarURL = path.resolve("avatars", fileName);
+    const avatarURL = path.join("avatars", fileName);
+    console.log(avatarURL);
     const user = await User.findByIdAndUpdate(id, { avatarURL }, { new: true });
     if (!user) {
       throw HttpError(401, "Not authorized");
