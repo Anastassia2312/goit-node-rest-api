@@ -8,9 +8,14 @@ import { registerSchema, loginSchema } from "../schemas/usersSchemas.js";
 import {
   getCurrentUser,
   updateAvatar,
+  verifyEmail,
+  verify,
 } from "../controllers/usersControllers.js";
 import auth from "../middlewares/auth.js";
 import upload from "../middlewares/upload.js";
+
+usersRouter.get("/verify/:verifyToken", verify);
+usersRouter.post("/verify", verifyEmail);
 usersRouter.post("/register", validateBody(registerSchema), register);
 usersRouter.post("/login", validateBody(loginSchema), login);
 usersRouter.post("/logout", auth, logout);

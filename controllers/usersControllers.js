@@ -6,7 +6,6 @@ import { jimpAvatar } from "../helpers/jimpAvatar.js";
 export const getCurrentUser = async (req, res, next) => {
   try {
     const { token } = req.user;
-    console.log(req.user);
     const result = await User.findOne({ token });
     const { email, subscription } = result;
     console.log(result);
@@ -33,6 +32,48 @@ export const updateAvatar = async (req, res, next) => {
       throw HttpError(401, "Not authorized");
     }
     res.status(200).json({ avatarURL });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verify = async (req, res, next) => {
+  try {
+    const { verifyToken } = req.params;
+    const user = await User.findOne({ verificationToken: verifyToken });
+
+    if (!user) {
+      throw HttpError(404, "User not found");
+    }
+    const id = user._id;
+    await User.findByIdAndUpdate(id, { verify: true, verificationToken: null });
+    res.status(200).json({ message: "Verification successful" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyEmail = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      throw HttpError(400, "missing required field email");
+    }
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      throw HttpError(404, "User not found");
+    }
+    if (user.verify === true) {
+      throw HttpError(400, "Verification has already been passed");
+    }
+    await User.updateOne(
+      { email: email },
+      {
+        verify: true,
+        verificationToken: null,
+      }
+    );
+    res.status(200).json({ message: "Verification email sent" });
   } catch (error) {
     next(error);
   }
